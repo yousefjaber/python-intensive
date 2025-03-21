@@ -1,0 +1,69 @@
+import timeit
+import random
+
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.left = None
+        self.right = None
+
+class BST:
+    """Binary Search Tree Implementation."""
+    def __init__(self):
+        self.root = None
+
+    def insert(self, key):
+        if self.root is None:
+            self.root = Node(key)
+        else:
+            self._insert(self.root, key)
+
+    def _insert(self, node, key):
+        if key < node.key:
+            if node.left is None:
+                node.left = Node(key)
+            else:
+                self._insert(node.left, key)
+        else:
+            if node.right is None:
+                node.right = Node(key)
+            else:
+                self._insert(node.right, key)
+
+    def search(self, key):
+        return self._search(self.root, key)
+
+    def _search(self, node, key):
+        if node is None or node.key == key:
+            return node is not None
+        if key < node.key:
+            return self._search(node.left, key)
+        return self._search(node.right, key)
+
+def benchmark_tree(size):
+    bst = BST()
+    keys = random.sample(range(size * 10), size)  # Generate unique random numbers
+
+    # Measure insert time
+    insert_time = timeit.timeit(lambda: [bst.insert(k) for k in keys], number=1)
+
+    # Measure search time for existing and non-existing keys
+    search_key = keys[size // 2]  # Pick a key that exists
+    search_time = timeit.timeit(lambda: bst.search(search_key), number=1000)
+
+    non_existing_key = size * 10 + 1
+    search_fail_time = timeit.timeit(lambda: bst.search(non_existing_key), number=1000)
+
+    return insert_time, search_time, search_fail_time
+
+if __name__ == "__main__":
+    small_tree_size = 10
+    large_tree_size = 10000
+
+    print("Benchmarking BST Performance:")
+    for size in [small_tree_size, large_tree_size]:
+        insert_time, search_time, search_fail_time = benchmark_tree(size)
+        print(f"\nTree Size: {size}")
+        print(f"Insertion Time: {insert_time:.6f} sec")
+        print(f"Search Time (existing key): {search_time:.6f} sec (1000 searches)")
+        print(f"Search Time (non-existing key): {search_fail_time:.6f} sec (1000 searches)")
